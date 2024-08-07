@@ -1,0 +1,149 @@
+-- Ensure you have a reference to the player, TweenService, and UserInputService
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
+-- The target CFrame coordinates
+local targetCFrame1 = CFrame.new(
+    -500.577, 3.41219, -397.862, 
+    -0.998761, 1.11119e-07, -0.0497702, 
+    1.13801e-07, 1, -5.10637e-08, 
+    0.0497702, -5.66644e-08, -0.998761
+)
+
+local targetCFrame2 = CFrame.new(
+    -368.142, 3.41213, -281.081, 
+    -0.0119832, -9.4861e-09, -0.999928, 
+    2.45866e-09, 1, -9.51624e-09, 
+    0.999928, -2.57252e-09, -0.0119832
+)
+
+local targetCFrame3 = CFrame.new(
+    -240.36, 3.41213, -280.954, 
+    0.00396398, -6.30137e-08, -0.999992, 
+    3.26617e-08, 1, -6.28847e-08, 
+    0.999992, -3.24122e-08, 0.00396398
+)
+
+local targetCFrame4 = CFrame.new(
+    -240.277, 3.73007, -96.8491, 
+    -0.00452369, -8.71844e-08, -0.99999, 
+    3.02498e-09, 1, -8.7199e-08, 
+    0.99999, -3.41941e-09, -0.00452369
+)
+
+local targetCFrame5 = CFrame.new(
+    -150.754, 3.73007, -96.759, 
+    0.00544481, 6.49671e-08, -0.999985, 
+    -6.43559e-08, 1, 6.46177e-08, 
+    0.999985, 6.40031e-08, 0.00544481
+)
+
+local targetCFrame6 = CFrame.new(
+    -151.141, 3.41213, -16.773, 
+    0.0254955, 6.96099e-10, -0.999675, 
+    1.69246e-08, 1, 1.12797e-09, 
+    0.999675, -1.69478e-08, 0.0254955
+)
+
+local targetCFrame7 = CFrame.new(
+    -32.8368, 3.73007, -18.154, 
+    0.895895, 1.2209e-09, 0.444265, 
+    1.14094e-09, 1, -5.04893e-09, 
+    -0.444265, 5.0302e-09, 0.895895
+)
+
+local targetCFrame8 = CFrame.new(
+    25.1844, 3.73713, 216.298, 
+    -0.954628, 3.45417e-09, -0.297803, 
+    2.63141e-08, 1, -7.27529e-08, 
+    0.297803, -7.72883e-08, -0.954628
+)
+
+-- Function to create and play a tween
+local function createAndPlayTween(targetCFrame, speed, callback)
+    local distance = (humanoidRootPart.Position - targetCFrame.Position).magnitude
+    local duration = distance / speed
+
+    local tweenInfo = TweenInfo.new(
+        duration, -- Duration
+        Enum.EasingStyle.Linear, -- Easing style
+        Enum.EasingDirection.Out, -- Easing direction
+        0, -- Repeat count (0 means no repeat)
+        false, -- Reverses (true means the tween will reverse once completed)
+        0 -- Delay time
+    )
+
+    local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
+
+    if callback then
+        tween.Completed:Connect(callback)
+    end
+
+    tween:Play()
+end
+
+-- Tween sequences
+local function simulateKeyPress(keyCode, holdDuration)
+    -- Simulate pressing and releasing the key
+    VirtualInputManager:SendKeyEvent(true, keyCode, false, nil)
+    wait(holdDuration)
+    VirtualInputManager:SendKeyEvent(false, keyCode, false, nil)
+end
+
+local function tweenToEighthTarget()
+    print("Tweens to eighth target") -- Debugging line
+    createAndPlayTween(targetCFrame8, 30, function()
+        -- Simulate pressing "E" key after tweening to the eighth target
+        simulateKeyPress(Enum.KeyCode.E, 1) -- Hold "E" key for 1 second (adjust as needed)
+    end)
+end
+
+local function tweenToSeventhTarget()
+    print("Tweens to seventh target") -- Debugging line
+    createAndPlayTween(targetCFrame7, 30, function()
+        -- Simulate pressing "E" key
+        simulateKeyPress(Enum.KeyCode.E, 1) -- Hold "E" key for 1 second (adjust as needed)
+        tweenToEighthTarget() -- Start tweening to the eighth target after holding "E"
+    end)
+end
+
+local function tweenToSixthTarget()
+    print("Tweens to sixth target") -- Debugging line
+    createAndPlayTween(targetCFrame6, 30, tweenToSeventhTarget)
+end
+
+local function tweenToFifthTarget()
+    print("Tweens to fifth target") -- Debugging line
+    createAndPlayTween(targetCFrame5, 30, tweenToSixthTarget)
+end
+
+local function tweenToFourthTarget()
+    print("Tweens to fourth target") -- Debugging line
+    createAndPlayTween(targetCFrame4, 30, tweenToFifthTarget)
+end
+
+local function tweenToThirdTarget()
+    print("Tweens to third target") -- Debugging line
+    createAndPlayTween(targetCFrame3, 30, tweenToFourthTarget)
+end
+
+local function tweenToSecondTarget()
+    print("Tweens to second target") -- Debugging line
+    createAndPlayTween(targetCFrame2, 30, tweenToThirdTarget)
+end
+
+local function startTweening()
+    print("Starts tweening") -- Debugging line
+    createAndPlayTween(targetCFrame1, 30, tweenToSecondTarget)
+end
+
+-- Listen for the "L" key press to start the tweening
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.L then
+        startTweening()
+    end
+end)
